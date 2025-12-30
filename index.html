@@ -30,11 +30,18 @@
     position: relative;
     z-index: 1;
 }
-
+        
+.card.owned {
+    filter: grayscale(0%) brightness(1) !important; 
+    border-color: #ff69b4 !important;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+}
+        
 .card:hover {
     transform: scale(1.15); 
     z-index: 10;     
-    filter: grayscale(30%) brightness(1.05); 
+    filter: grayscale(30%) brightness(1.05) !important; 
     box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
@@ -107,18 +114,19 @@
 
     let globalCardData = []; 
 
-    async function fetchData() {
-        try {
-            const response = await fetch(api_url);
-            const data = await response.json();
-            globalCardData = data;
-            
-            setupFilters(); 
-            renderCards(globalCardData); 
-        } catch (error) {
-            console.error('抓取資料失敗:', error);
-        }
+async function fetchData() {
+    try {
+        const response = await fetch(api_url);
+        const data = await response.json();
+        globalCardData = data;
+        
+        setupFilters(); 
+        applyFilters(); 
+        
+    } catch (error) {
+        console.error('抓取資料失敗:', error);
     }
+}
 
     function setupFilters() {
         const categories = [...new Set(globalCardData.map(c => c.category))].filter(Boolean);
@@ -206,6 +214,7 @@
 </body>
 
 </html>
+
 
 
 
