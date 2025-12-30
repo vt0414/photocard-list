@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的小卡收集冊 - 進度追蹤</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdf6f6; text-align: center; padding: 20px; color: #444; }
+        
+        /* 進度條容器 */
+        .progress-container {
+            position: sticky; top: 0; background: white; padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; margin-bottom: 20px;
+            border-radius: 0 0 15px 15px;
+        }
+        .progress-bar-bg { width: 100%; max-width: 500px; height: 20px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; }
+        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ffb6c1, #ff69b4); transition: width 0.3s ease; }
+        
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 10px; }
+        
+        /* 小卡樣式 */
+        .card {
+            width: 120px; border: 2px solid #eee; border-radius: 12px;
+            overflow: hidden; cursor: pointer; background: white;
+            transition: all 0.3s ease; filter: grayscale(100%) brightness(0.9);
+        }
+
+        /* 已擁有狀態 */
+        .card.owned {
+            filter: grayscale(0%) brightness(1);
+            border-color: #ff69b4;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+        .card-info { font-size: 11px; padding: 8px; line-height: 1.4; }
+        
+        h1 { color: #ff69b4; margin-bottom: 5px; }
+        .stats-text { font-weight: bold; font-size: 18px; color: #ff4081; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <h1>小卡收集進度</h1>
+        <div class="stats-text" id="stats">已收集 0 / 0 (0%)</div>
+        <div class="progress-bar-bg">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="container" id="gallery"></div>
+
+    <script>
+        // 這裡放你的試算表資料，可以根據活動分類
+        const cardData = [
+            { id: 1, group: "Unit A", event: "Supernova", name: "Karina A", img: "https://via.placeholder.com/150x210?text=Karina" },
+            { id: 2, group: "Unit A", event: "Supernova", name: "Winter A", img: "https://via.placeholder.com/150x210?text=Winter" },
+            { id: 3, group: "Unit B", event: "Armageddon", name: "Giselle B", img: "https://via.placeholder.com/150x210?text=Giselle" },
+            { id: 4, group: "Unit B", event: "Armageddon", name: "Ningning B", img: "https://via.placeholder.com/150x210?text=Ningning" }
+        ];
+
+        const gallery = document.getElementById('gallery');
+        const statsText = document.getElementById('stats');
+        const progressFill = document.getElementById('progress-fill');
+
+        // 更新百分比的函數
+        function updateStats() {
+            const total = cardData.length;
+            const ownedCount = document.querySelectorAll('.card.owned').length;
+            const percentage = total === 0 ? 0 : Math.round((ownedCount / total) * 100);
+            
+            statsText.innerText = `已收集 ${ownedCount} / ${total} (${percentage}%)`;
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        // 初始化渲染
+        function renderCards() {
+            cardData.forEach(card => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.id = `pc-${card.id}`;
+                
+                if (localStorage.getItem(cardEl.id) === 'true') {
+                    cardEl.classList.add('owned');
+                }
+
+                cardEl.innerHTML = `
+                    <img src="${card.img}" alt="${card.name}">
+                    <div class="card-info">
+                        <strong>[${card.event}]</strong><br>
+                        ${card.name}
+                    </div>
+                `;
+
+                cardEl.onclick = function() {
+                    this.classList.toggle('owned');
+                    localStorage.setItem(this.id, this.classList.contains('owned'));
+                    updateStats(); // 每次點擊都更新百分比
+                };
+
+                gallery.appendChild(cardEl);
+            });
+            updateStats(); // 初始載入也要算一次
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>
