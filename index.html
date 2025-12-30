@@ -53,17 +53,51 @@
     <div class="container" id="gallery"></div>
 
     <script>
-        // 這裡放你的試算表資料，可以根據活動分類
-        const cardData = [
-            { id: 1, group: "Unit A", event: "Supernova", name: "Karina A", img: "https://via.placeholder.com/150x210?text=Karina" },
-            { id: 2, group: "Unit A", event: "Supernova", name: "Winter A", img: "https://via.placeholder.com/150x210?text=Winter" },
-            { id: 3, group: "Unit B", event: "Armageddon", name: "Giselle B", img: "https://via.placeholder.com/150x210?text=Giselle" },
-            { id: 4, group: "Unit B", event: "Armageddon", name: "Ningning B", img: "https://via.placeholder.com/150x210?text=Ningning" }
-        ];
+        const api_url = 'https://script.google.com/macros/library/d/1vjD65hnqMUgbCXyyvj9rBzC-GqbDMKy1aXkxqzE_N0fzPuiXQW5VTnOH/1'; 
+    const gallery = document.getElementById('gallery');
+    const statsText = document.getElementById('stats');
+    const progressFill = document.getElementById('progress-fill');
 
-        const gallery = document.getElementById('gallery');
-        const statsText = document.getElementById('stats');
-        const progressFill = document.getElementById('progress-fill');
+    async function fetchData() {
+        try {
+            const response = await fetch(api_url);
+            const cardData = await response.json();
+            renderCards(cardData);
+        } catch (error) {
+            console.error('抓取資料失敗:', error);
+            gallery.innerHTML = '<p>資料讀取中，或網址設定錯誤...</p>';
+        }
+    }
+
+        function renderCards(cardData) {
+        gallery.innerHTML = ''; // 清空內容
+        
+        cardData.forEach(card => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.id = `pc-${card.id}`;
+            
+            if (localStorage.getItem(cardEl.id) === 'true') {
+                cardEl.classList.add('owned');
+            }
+
+            cardEl.innerHTML = `
+                <img src="${card.img}" loading="lazy">
+                <div class="card-info">
+                    <strong>${card.name}</strong>-${card.member}
+                </div>
+            `;
+
+            cardEl.onclick = function() {
+                this.classList.toggle('owned');
+                localStorage.setItem(this.id, this.classList.contains('owned'));
+                updateStats(cardData.length);
+            };
+
+            gallery.appendChild(cardEl);
+        });
+        updateStats(cardData.length);
+    }
 
         // 更新百分比的函數
         function updateStats() {
@@ -75,37 +109,8 @@
             progressFill.style.width = `${percentage}%`;
         }
 
-        // 初始化渲染
-        function renderCards() {
-            cardData.forEach(card => {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card';
-                cardEl.id = `pc-${card.id}`;
-                
-                if (localStorage.getItem(cardEl.id) === 'true') {
-                    cardEl.classList.add('owned');
-                }
-
-                cardEl.innerHTML = `
-                    <img src="${card.img}" alt="${card.name}">
-                    <div class="card-info">
-                        <strong>[${card.event}]</strong><br>
-                        ${card.name}
-                    </div>
-                `;
-
-                cardEl.onclick = function() {
-                    this.classList.toggle('owned');
-                    localStorage.setItem(this.id, this.classList.contains('owned'));
-                    updateStats(); // 每次點擊都更新百分比
-                };
-
-                gallery.appendChild(cardEl);
-            });
-            updateStats(); // 初始載入也要算一次
-        }
-
-        renderCards();
+        fetchData();
     </script>
 </body>
+
 </html>
