@@ -38,7 +38,24 @@
         
         h1 { color: #ff69b4; margin-bottom: 5px; }
         .stats-text { font-weight: bold; font-size: 18px; color: #ff4081; }
+
+        .filter-container {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.filter-container select {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #ffb6c1;
+    background: white;
+    color: #444;
+    outline: none;
+    cursor: pointer;
+}
     </style>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
 
@@ -48,35 +65,78 @@
         <div class="progress-bar-bg">
             <div id="progress-fill" class="progress-bar-fill"></div>
         </div>
+        <div class="filter-container">
+    <select id="filter-category">
+        <option value="">所有分類</option>
+    </select>
+    <select id="filter-member">
+        <option value="">所有成員</option>
+    </select>
+</div>
     </div>
 
     <div class="container" id="gallery"></div>
-<script>
+    <script>
     const api_url = 'https://script.google.com/macros/s/AKfycbxyGc65RVluqkrHIZp7AX1e6-xAZiaeK8EYCCryr5Aq3YxRojZhI-rq0UIltMQJZ4nl/exec'; 
     const gallery = document.getElementById('gallery');
     const statsText = document.getElementById('stats');
     const progressFill = document.getElementById('progress-fill');
+    const selectCategory = document.getElementById('filter-category');
+    const selectMember = document.getElementById('filter-member');
+
+    let globalCardData = []; // 存放所有原始資料
 
     async function fetchData() {
         try {
             const response = await fetch(api_url);
-            const data = await response.json(); 
+            const data = await response.json();
+            globalCardData = data;
             
-            if (data && data.length > 0) {
-                renderCards(data);
-            } else {
-                gallery.innerHTML = '<p>試算表中沒有資料喔！</p>';
-            }
+            setupFilters(); // 1. 設定選單選項
+            renderCards(globalCardData); // 2. 初始渲染全部卡片
         } catch (error) {
             console.error('抓取資料失敗:', error);
-            gallery.innerHTML = '<p>讀取失敗，請檢查 API 網址或網路連線。</p>';
         }
     }
 
-    function renderCards(cards) {
-        gallery.innerHTML = ''; 
-        
-        cards.forEach(card => {
+    // 動態生成下拉選單選項
+    function setupFilters() {
+        // 使用 Set 取得不重複的清單
+        const categories = [...new Set(globalCardData.map(c => c.category))].filter(Boolean);
+        const members = [...new Set(globalCardData.map(c => c.member))].filter(Boolean);
+
+        categories.forEach(cat => {
+            const opt = new Option(cat, cat);
+            selectCategory.add(opt);
+        });
+
+        members.forEach(mem => {
+            const opt = new Option(mem, mem);
+            selectMember.add(opt);
+        });
+
+        // 監聽選單更換事件
+        selectCategory.onchange = applyFilters;
+        selectMember.onchange = applyFilters;
+    }
+
+    // 執行過濾邏輯
+    function applyFilters() {
+        const catValue = selectCategory.value;
+        const memValue = selectMember.value;
+
+        const filtered = globalCardData.filter(card => {
+            const matchCat = catValue === "" || card.category === catValue;
+            const matchMem = memValue === "" || card.member === memValue;
+            return matchCat && matchMem;
+        });
+
+        renderCards(filtered);
+    }
+
+    function renderCards(cardsToDisplay) {
+        gallery.innerHTML = '';
+        cardsToDisplay.forEach(card => {
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             const storageId = `pc-${card.id}`;
@@ -86,39 +146,42 @@
             }
 
             cardEl.innerHTML = `
-    <img src="${card.img}" 
-         onerror="console.error('圖片載入失敗，ID:', '${card.id}', '網址:', '${card.img}'); this.src='https://via.placeholder.com/150x210?text=Image+Error'">
-    <div class="card-info">
-        <strong>${card.name || ' '}</strong><br>${card.member || ' '}
-    </div>
-`;
+                <img src="${card.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x210?text=Error'">
+                <div class="card-info">
+                    <strong>${card.name || ' '}</strong><br>${card.member || ''} (${card.category || ''})
+                </div>
+            `;
 
             cardEl.onclick = function() {
                 this.classList.toggle('owned');
                 localStorage.setItem(storageId, this.classList.contains('owned'));
-                updateStats(cards.length); // 傳入總數進行計算
+                updateStats(); 
             };
-
             gallery.appendChild(cardEl);
         });
-        updateStats(cards.length);
+        updateStats(); 
     }
 
-    function updateStats(totalCount) {
-        const ownedCount = document.querySelectorAll('.card.owned').length;
-        const total = totalCount || 0;
+    function updateStats() {
+        const total = globalCardData.length;
+        let ownedCount = 0;
+        globalCardData.forEach(card => {
+            if (localStorage.getItem(`pc-${card.id}`) === 'true') {
+                ownedCount++;
+            }
+        });
+
         const percentage = total === 0 ? 0 : Math.round((ownedCount / total) * 100);
-        
         statsText.innerText = `已收集 ${ownedCount} / ${total} (${percentage}%)`;
         progressFill.style.width = `${percentage}%`;
     }
 
-    // 啟動程式
     fetchData();
 </script>
 </body>
 
 </html>
+
 
 
 
