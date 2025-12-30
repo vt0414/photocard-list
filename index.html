@@ -17,27 +17,30 @@
         
         .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 10px; }
         
+
 .card {
     width: 120px; 
     border: 2px solid #eee; 
     border-radius: 12px;
-    overflow: hidden;
+    overflow: hidden; 
     cursor: pointer; 
     background: white;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     filter: grayscale(100%) brightness(0.9);
-    position: relative; 
+    position: relative;
+    z-index: 1;
 }
 
 .card:hover {
     transform: scale(1.15); 
     z-index: 10;     
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15); 
+    filter: grayscale(30%) brightness(1.05); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
 .card.owned:hover {
     filter: grayscale(0%) brightness(1.1);
-    box-shadow: 0 10px 25px rgba(255, 105, 180, 0.5);
+    box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
 }
 
 .card img {
@@ -47,7 +50,7 @@
     display: block;
     transition: transform 0.3s ease;
 }
-
+        
 .card:hover img {
     transform: scale(1.2);
 }
@@ -102,7 +105,7 @@
     const selectCategory = document.getElementById('filter-category');
     const selectMember = document.getElementById('filter-member');
 
-    let globalCardData = []; // 存放所有原始資料
+    let globalCardData = []; 
 
     async function fetchData() {
         try {
@@ -110,16 +113,14 @@
             const data = await response.json();
             globalCardData = data;
             
-            setupFilters(); // 1. 設定選單選項
-            renderCards(globalCardData); // 2. 初始渲染全部卡片
+            setupFilters(); 
+            renderCards(globalCardData); 
         } catch (error) {
             console.error('抓取資料失敗:', error);
         }
     }
 
-    // 動態生成下拉選單選項
     function setupFilters() {
-        // 使用 Set 取得不重複的清單
         const categories = [...new Set(globalCardData.map(c => c.category))].filter(Boolean);
         const members = [...new Set(globalCardData.map(c => c.member))].filter(Boolean);
 
@@ -133,12 +134,17 @@
             selectMember.add(opt);
         });
 
-        // 監聽選單更換事件
+        if (selectCategory.options.length > 1) {
+            selectCategory.selectedIndex = 1; 
+        }
+        if (selectMember.options.length > 1) {
+            selectMember.selectedIndex = 1;  
+        }
+
         selectCategory.onchange = applyFilters;
         selectMember.onchange = applyFilters;
     }
 
-    // 執行過濾邏輯
     function applyFilters() {
         const catValue = selectCategory.value;
         const memValue = selectMember.value;
@@ -153,32 +159,33 @@
     }
 
     function renderCards(cardsToDisplay) {
-        gallery.innerHTML = '';
-        cardsToDisplay.forEach(card => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'card';
-            const storageId = `pc-${card.id}`;
-            
-            if (localStorage.getItem(storageId) === 'true') {
-                cardEl.classList.add('owned');
-            }
+    gallery.innerHTML = '';
+    cardsToDisplay.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        const storageId = `pc-${card.id}`;
+        
+        if (localStorage.getItem(storageId) === 'true') {
+            cardEl.classList.add('owned');
+        }
 
-            cardEl.innerHTML = `
-                <img src="${card.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x210?text=Error'">
-                <div class="card-info">
-                    <strong>${card.name || ' '}</strong><br>${card.member || ''} (${card.category || ''})
-                </div>
-            `;
+        cardEl.innerHTML = `
+            <img src="${card.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x210?text=Error'">
+            <div class="card-info">
+                <strong>${card.name || ' '}</strong><br>
+                ${card.member || ''} (${card.category || ''})
+            </div>
+        `;
 
-            cardEl.onclick = function() {
-                this.classList.toggle('owned');
-                localStorage.setItem(storageId, this.classList.contains('owned'));
-                updateStats(); 
-            };
-            gallery.appendChild(cardEl);
-        });
-        updateStats(); 
-    }
+        cardEl.onclick = function() {
+            this.classList.toggle('owned');
+            localStorage.setItem(storageId, this.classList.contains('owned'));
+            updateStats(); 
+        };
+        gallery.appendChild(cardEl);
+    });
+    updateStats(); 
+}
 
     function updateStats() {
         const total = globalCardData.length;
@@ -199,6 +206,7 @@
 </body>
 
 </html>
+
 
 
 
