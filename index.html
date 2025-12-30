@@ -86,11 +86,12 @@
             }
 
             cardEl.innerHTML = `
-                <img src="${card.img}" onerror="this.src='https://via.placeholder.com/150x210?text=Image+Error'">
-                <div class="card-info">
-                    <strong>${card.name || ' '}</strong>-${card.member || '未知活動'}
-                </div>
-            `;
+    <img src="${card.img}" 
+         onerror="console.error('圖片載入失敗，ID:', '${card.id}', '網址:', '${card.img}'); this.src='https://via.placeholder.com/150x210?text=Image+Error'">
+    <div class="card-info">
+        <strong>${card.name || ' '}</strong><br>${card.member || ' '}
+    </div>
+`;
 
             cardEl.onclick = function() {
                 this.classList.toggle('owned');
@@ -118,5 +119,6 @@
 </body>
 
 </html>
+
 
 
