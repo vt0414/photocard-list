@@ -108,7 +108,7 @@
             <select id="filter-detail"><option value="">所有細項</option></select>
             <select id="filter-member"><option value="">所有成員</option></select>
             <button onclick="saveData()" class="btn btn-save">儲存</button>
-            <button onclick="undoData()" class="btn btn-undo">返回上次儲存資料</button>
+            <button onclick="undoData()" class="btn btn-undo">還原至上次紀錄</button>
         </div>
     </div>
     <div class="container" id="gallery"></div>
@@ -131,10 +131,8 @@
     "其他": ["2020夏盒 : COME TOGETHER", "BLACKROUGE 代言", "LEAGUE OF THE UNIVERSE", "UNIVERSE FANPARTY : SUNDAY CRAVITY", "2021夏盒 : STAND TOGETHER", "SEARCHIT 代言", "MAKE P:REM 代言", "2023 FAN-CON DVD", "2023 1ST WORLD TOUR DVD"]
 };
 
-// 2. 定義成員清單 (也可以順便固定順序)
-const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", "刑準", "太榮", "性珉"];
-
-    // 登入邏輯
+const memberList = ["朴世琳", "馬蒔權", "具廷謨", "徐宇璸", "咸元進", "姜珉熙", "宋刑準", "金太榮", "安性珉"];
+    
     async function handleLogin(type) {
         const input = document.getElementById('username-input').value.trim();
         const loading = document.getElementById('loading-overlay');
@@ -153,11 +151,11 @@ const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", 
                 currentCloudData = result.currentData || "";
                 lastCloudData = result.lastData || "";
                 syncLocalWithData(currentCloudData);
-                document.getElementById('user-info').innerText = `👤 會員: ${currentUser}`;
+                document.getElementById('user-info').innerText = `👤 使用者: ${currentUser}`;
             } catch(e) { alert("登入失敗，請檢查網路"); return; }
         } else {
             isGuest = true;
-            document.getElementById('user-info').innerText = `🍃 訪客模式 (不支援雲端儲存)`;
+            document.getElementById('user-info').innerText = `🍃 訪客模式 (不支援儲存功能)`;
         }
 
         document.getElementById('login-overlay').classList.add('hidden');
@@ -253,7 +251,7 @@ const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", 
     }
 
     async function saveData() {
-        if (isGuest) return alert("訪客無法儲存至雲端");
+        if (isGuest) return alert("訪客無法儲存");
         const ownedIds = globalCardData.filter(c => localStorage.getItem(`pc-${c.id}`) === 'true').map(c => c.id).join(',');
         
         document.getElementById('loading-overlay').classList.remove('hidden');
@@ -265,17 +263,48 @@ const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", 
         if (result.status === 'saved') {
             lastCloudData = currentCloudData;
             currentCloudData = ownedIds;
-            alert("雲端儲存成功！");
+            alert("儲存成功！");
         }
         document.getElementById('loading-overlay').classList.add('hidden');
     }
 
-    function undoData() {
-        if (isGuest || !lastCloudData) return alert("無上次紀錄");
-        if (confirm("還原至上次儲存的紀錄？")) {
+    async function undoData() {
+    if (isGuest) return alert("訪客模式不支援此功能");
+    if (!lastCloudData) return alert("目前沒有上次儲存的紀錄可以還原");
+    
+    if (confirm("確定要還原至上次紀錄嗎？\n(還原後系統將自動為您同步至資料庫)")) {
+        
+        const loading = document.getElementById('loading-overlay');
+        loading.classList.remove('hidden');
+
+        try {
             syncLocalWithData(lastCloudData);
+            
+            const res = await fetch(api_url, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: 'save', 
+                    username: currentUser, 
+                    data: lastCloudData 
+                })
+            });
+            
+            const result = await res.json();
+            
+            if (result.status === 'saved') {
+                currentCloudData = lastCloudData; 
+                alert("還原成功！");
+            } else {
+                alert("還原時同步失敗，請手動點擊儲存。");
+            }
+        } catch (error) {
+            console.error("還原同步出錯:", error);
+            alert("同步發生錯誤，請重新整理頁面。");
+        } finally {
+            loading.classList.add('hidden');
         }
     }
+}
 
     function syncLocalWithData(dataStr) {
         globalCardData.forEach(c => localStorage.removeItem(`pc-${c.id}`));
@@ -287,4 +316,5 @@ const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", 
 </script>
 </body>
 </html>
+
 
