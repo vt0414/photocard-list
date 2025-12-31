@@ -1,320 +1,483 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRAVITY小卡收集冊</title>
-    <style>
-        :root {
-            --primary-green: #4CAF50;
-            --dark-green: #2E7D32;
-            --light-green: #E8F5E9;
-            --accent-green: #81C784;
-            --text-color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRAVITY小卡收集冊</title>
+<style>
+    :root {
+        --primary-green: #4CAF50;
+        --dark-green: #2E7D32;
+        --light-green: #E8F5E9;
+        --accent-green: #81C784;
+        --text-color: #333;
+    }
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0; padding: 0;
-            background-color: var(--light-green);
-            color: var(--text-color);
-            text-align: center;
-        }
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0; padding: 0;
+        background-color: var(--light-green);
+        color: var(--text-color);
+        text-align: center;
+    }
 
-        /* 登入畫面 */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, var(--light-green) 0%, var(--accent-green) 100%);
-            display: flex; justify-content: center; align-items: center; z-index: 10001;
-        }
-        .login-box {
-            background: white; padding: 40px; border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(46, 125, 50, 0.2);
-            border: 2px solid var(--primary-green); width: 85%; max-width: 350px;
-        }
+    /* 登入畫面 */
+    #login-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, var(--light-green) 0%, var(--accent-green) 100%);
+        display: flex; justify-content: center; align-items: center; z-index: 10001;
+    }
+    .login-box {
+        background: white; padding: 40px; border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(46, 125, 50, 0.2);
+        border: 2px solid var(--primary-green); width: 85%; max-width: 350px;
+    }
 
-        /* 載入畫面 */
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex; justify-content: center; align-items: center; z-index: 10000;
-            transition: opacity 0.3s;
-        }
+    /* 載入畫面 */
+    #loading-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex; justify-content: center; align-items: center; z-index: 10000;
+        transition: opacity 0.3s;
+    }
 
-        /* 主導航欄 */
-        .header-container {
-            position: sticky; top: 0; background: white; padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 1000;
-            border-bottom: 3px solid var(--primary-green);
-        }
+    /* 主導航欄 */
+    .header-container {
+        position: sticky; top: 0; background: white; padding: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 1000;
+        border-bottom: 3px solid var(--primary-green);
+    }
 
-        .stats-text { font-weight: bold; font-size: 1.2rem; color: var(--dark-green); margin: 5px 0; }
-        
-        /* 進度條 */
-        .progress-bar-bg { width: 100%; max-width: 500px; height: 15px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; }
-        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-green), var(--primary-green)); transition: width 0.3s ease; }
+    .stats-text { font-weight: bold; font-size: 1.2rem; color: var(--dark-green); margin: 5px 0; }
+    
+    /* 進度條 */
+    .progress-bar-bg { width: 100%; max-width: 500px; height: 15px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; }
+    .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-green), var(--primary-green)); transition: width 0.3s ease; }
 
-        /* 按鈕與下拉選單 */
-        .controls-group {display: flex;flex-wrap: wrap;justify-content: center;gap: 8px;padding: 10px;}
-        select {min-width: 140px;max-width: 200px;text-overflow: ellipsis; }
-        .btn {
-            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-green);
-            outline: none; cursor: pointer; font-size: 14px;
-        }
-        .btn { border: none; font-weight: bold; transition: 0.3s; }
-        .btn-save { background: var(--dark-green); color: white; }
-        .btn-undo { background: var(--accent-green); color: white; }
-        .btn-main { background: var(--primary-green); color: white; width: 100%; margin-top: 10px; padding: 12px; }
+    /* 按鈕與下拉選單 */
+    .controls-group {display: flex;flex-wrap: wrap;justify-content: center;gap: 8px;padding: 10px;}
+    select {min-width: 140px;max-width: 200px;text-overflow: ellipsis; }
+    .btn {
+        padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-green);
+        outline: none; cursor: pointer; font-size: 14px;
+    }
+    .btn { border: none; font-weight: bold; transition: 0.3s; }
+    .btn-save { background: var(--dark-green); color: white; }
+    .btn-undo { background: var(--accent-green); color: white; }
+    .btn-main { background: var(--primary-green); color: white; width: 100%; margin-top: 10px; padding: 12px; }
 
-        /* 卡片展示區 */
-        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 20px; max-width: 1200px; margin: auto; }
-        .card {
-            background: white; border-radius: 12px; overflow: hidden; border: 2px solid #eee;
-            transition: 0.3s; filter: grayscale(100%) brightness(0.9); cursor: pointer;
-        }
-        .card.owned { filter: grayscale(0%) brightness(1) !important; border-color: var(--primary-green) !important; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3); }
-        .card:hover { transform: scale(1.05); z-index: 5; }
-        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .card-info { font-size: 11px; padding: 8px; background: #fafafa; }
+    /* 卡片展示區 */
+    .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 20px; max-width: 1200px; margin: auto; }
+.card {
+background: white; 
+border-radius: 12px; 
+overflow: hidden; 
+border: 2px solid #eee;
+transition: 0.3s; 
+filter: grayscale(100%) brightness(0.9); 
+cursor: pointer;
+position: relative; 
+}
 
-        .hidden { display: none !important; opacity: 0; pointer-events: none; }
-    </style>
+/* 數量控制鈕的細節樣式，確保按鈕圓形且對齊 */
+.cnt-btn {
+width: 26px; 
+height: 26px; 
+border-radius: 50%; 
+border: none; 
+background: var(--primary-green); 
+color: white; 
+font-weight: bold; 
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+line-height: 1;
+}
+.count-num {
+margin: 0 10px; 
+font-weight: bold; 
+color: var(--dark-green); 
+min-width: 20px;
+}
+
+.card-badge {
+position: absolute;
+top: 8px;
+left: 8px;
+background: rgba(255, 255, 255, 0.85);
+backdrop-filter: blur(4px);           
+color: var(--dark-green);
+padding: 3px 10px;
+border-radius: 20px;
+font-size: 10px;
+font-weight: bold;
+border: 1px solid var(--accent-green);
+z-index: 2;
+pointer-events: none;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card.owned .card-badge {
+background: var(--primary-green);
+color: white;
+border-color: var(--dark-green);
+}
+    
+    .card.owned { filter: grayscale(0%) brightness(1) !important; border-color: var(--primary-green) !important; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3); }
+    .card:hover { transform: scale(1.05); z-index: 5; }
+    .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+    .card-info { font-size: 11px; padding: 8px; background: #fafafa; }
+
+    .hidden { display: none !important; opacity: 0; pointer-events: none; }
+</style>
 </head>
 <body>
 
 <div id="loading-overlay" class="hidden">
-    <img src="logo.gif" alt="Loading" style="width: 200px;">
+<img src="logo.gif" alt="Loading" style="width: 200px;">
 </div>
 
 <div id="login-overlay">
-    <div class="login-box">
-        <h2 style="color: var(--dark-green);">🌱CRAVITY小卡收集冊</h2>
-        <input type="text" id="username-input" placeholder="請輸入使用者名稱" style="width: 90%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-        <button onclick="handleLogin('member')" class="btn btn-main">登入</button>
-        <button onclick="handleLogin('guest')" class="btn" style="width: 100%; margin-top: 10px; background: #eee;">訪客登入</button>
-    </div>
+<div class="login-box">
+    <h2 style="color: var(--dark-green);">🌱CRAVITY小卡收集冊</h2>
+    <input type="text" id="username-input" placeholder="請輸入使用者名稱" style="width: 90%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+    <button onclick="handleLogin('member')" class="btn btn-main">登入</button>
+    <button onclick="handleLogin('guest')" class="btn" style="width: 100%; margin-top: 10px; background: #eee;">訪客登入</button>
+</div>
 </div>
 
 <div id="main-content" class="hidden">
-    <div class="header-container">
-        <div id="user-info" style="font-size: 14px; color: #666;"></div>
-        <div class="stats-text" id="stats">已收集 0 / 0 (0%)</div>
-        <div class="progress-bar-bg">
-            <div id="progress-fill" class="progress-bar-fill"></div>
-        </div>
+<div class="header-container">
+<div id="user-info" style="font-size: 14px; color: #666;"></div>
+<div class="stats-text" id="stats-types">種類進度: 0 / 0 (0%)</div>
+<div id="stats-total" style="font-size: 14px; color: var(--dark-green); margin-bottom: 5px;">總持有張數: 0 張</div>
 
-        <div class="controls-group">
-            <select id="filter-category"><option value="">所有大類</option></select>
-            <select id="filter-detail"><option value="">所有細項</option></select>
-            <select id="filter-member"><option value="">所有成員</option></select>
-            <button onclick="saveData()" class="btn btn-save">儲存</button>
-            <button onclick="undoData()" class="btn btn-undo">還原至上次紀錄</button>
-        </div>
+<div class="progress-bar-bg">
+    <div id="progress-fill" class="progress-bar-fill"></div>
+</div>
+</div>
+
+    <div class="controls-group">
+        <select id="filter-category"><option value="">所有大類</option></select>
+        <select id="filter-detail"><option value="">所有細項</option></select>
+        <select id="filter-member"><option value="">所有成員</option></select>
+        <button onclick="saveData()" class="btn btn-save">儲存</button>
+        <button onclick="undoData()" class="btn btn-undo">還原至上次紀錄</button>
     </div>
-    <div class="container" id="gallery"></div>
+</div>
+<div class="container" id="gallery"></div>
 </div>
 
 <script>
-    const api_url = 'https://script.google.com/macros/s/AKfycbzchiRELVYT0PhzLgGwRR5OYrOaIkn2ZiZ7nEGoRQu4k0jEWNjF1L-w57baP4qMmy2Wow/exec'; 
-    
-    let globalCardData = [];
-    let currentUser = '';
-    let isGuest = false;
-    let currentCloudData = "";
-    let lastCloudData = "";
-    const categoryMap = {
-    "專輯": ["Mini1", "Mini2", "Mini3", "正規1", "Mini4", "Mini5", "Mini6", "Mini7", "Single Album", "正規2", "JAPAN DEBUT SINGLE", "JAPAN 1st EP"],
-    "演唱會/FANCON": ["2020 FANMEETING : C EXPRESS", "2021 FANMEETING : C DELIVERY", "2022 1st CONCERT : CENTER OF GRAVITY", "2022 1st FAN-CON IN OSAKA", "2022 UNI-KON", "2022 CHRISTMAS SPECIAL FANMEETING", "2023 FAN-CON : Dear My Luvity", "2023 1ST WORLD TOUR : MASTER PIECE", "2024 FAN-CON : LUVITY GAMES", "2024 JAPAN FANCON : SHOW OFF", "2024 FAN-CON : BEYOND YOUR MEMORIES", "2025 FAN CONCERT : Dare to Crave", "2026 FAN-CON : VITY FESTA"],
-    "快閃店": ["CCREW", "3rd ANNIVERSARY : REMEMBER OUR TIME", "SUMMER CCREW", "WINTER CCREW", "AUTUMN CCREW"],
-    "年曆": ["2021 : CAFE∙CRAVITY", "2022 : BAND CRVT", "2023 : CRVT’S SWEETS", "2024 : CRVT-STAY", "2025 : CRAVITY BFF TRIP", "2026 : WE ARE CRAVITY CREW"],
-    "會員禮": ["2020 1st FANSHIP", "2021 2nd FANSHIP", "2022 2.5 FANSHIP", "2023 3rd FANSHIP", "2024 4th FANSHIP", "2025 5th FANSHIP"],
-    "其他": ["2020夏盒 : COME TOGETHER", "BLACKROUGE 代言", "LEAGUE OF THE UNIVERSE", "UNIVERSE FANPARTY : SUNDAY CRAVITY", "2021夏盒 : STAND TOGETHER", "SEARCHIT 代言", "MAKE P:REM 代言", "2023 FAN-CON DVD", "2023 1ST WORLD TOUR DVD"]
+const api_url = 'https://script.google.com/macros/s/AKfycbzchiRELVYT0PhzLgGwRR5OYrOaIkn2ZiZ7nEGoRQu4k0jEWNjF1L-w57baP4qMmy2Wow/exec'; 
+
+let globalCardData = [];
+let currentUser = '';
+let isGuest = false;
+let currentCloudData = "";
+let lastCloudData = "";
+const categoryMap = {
+"專輯": ["Mini1", "Mini2", "Mini3", "正規1", "Mini4", "Mini5", "Mini6", "Mini7", "Single Album", "正規2", "JAPAN DEBUT SINGLE", "JAPAN 1st EP"],
+"演唱會/FANCON": ["2020 FANMEETING : C EXPRESS", "2021 FANMEETING : C DELIVERY", "2022 1st CONCERT : CENTER OF GRAVITY", "2022 1st FAN-CON IN OSAKA", "2022 UNI-KON", "2022 CHRISTMAS SPECIAL FANMEETING", "2023 FAN-CON : Dear My Luvity", "2023 1ST WORLD TOUR : MASTER PIECE", "2024 FAN-CON : LUVITY GAMES", "2024 JAPAN FANCON : SHOW OFF", "2024 FAN-CON : BEYOND YOUR MEMORIES", "2025 FAN CONCERT : Dare to Crave", "2026 FAN-CON : VITY FESTA"],
+"快閃店": ["CCREW", "3rd ANNIVERSARY : REMEMBER OUR TIME", "SUMMER CCREW", "WINTER CCREW", "AUTUMN CCREW"],
+"年曆": ["2021 : CAFE∙CRAVITY", "2022 : BAND CRVT", "2023 : CRVT’S SWEETS", "2024 : CRVT-STAY", "2025 : CRAVITY BFF TRIP", "2026 : WE ARE CRAVITY CREW"],
+"會員禮": ["2020 1st FANSHIP", "2021 2nd FANSHIP", "2022 2.5 FANSHIP", "2023 3rd FANSHIP", "2024 4th FANSHIP", "2025 5th FANSHIP"],
+"其他": ["2020夏盒 : COME TOGETHER", "BLACKROUGE 代言", "LEAGUE OF THE UNIVERSE", "UNIVERSE FANPARTY : SUNDAY CRAVITY", "2021夏盒 : STAND TOGETHER", "SEARCHIT 代言", "MAKE P:REM 代言", "2023 FAN-CON DVD", "2023 1ST WORLD TOUR DVD"]
 };
 
-const memberList = ["朴世琳", "馬蒔權", "具廷謨", "徐宇璸", "咸元進", "姜珉熙", "宋刑準", "金太榮", "安性珉"];
+const memberList = ["分隊卡","朴世琳", "馬蒔權", "具廷謨", "徐宇璸", "咸元進", "姜珉熙", "宋刑準", "金太榮", "安性珉"];
+
+async function handleLogin(type) {
+    const input = document.getElementById('username-input').value.trim();
+    const loading = document.getElementById('loading-overlay');
     
-    async function handleLogin(type) {
-        const input = document.getElementById('username-input').value.trim();
-        const loading = document.getElementById('loading-overlay');
-        
-        if (type === 'member') {
-            if (!input) return alert("請輸入帳號");
-            currentUser = input;
-            loading.classList.remove('hidden');
-            
-            try {
-                const res = await fetch(api_url, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'login', username: currentUser })
-                });
-                const result = await res.json();
-                currentCloudData = result.currentData || "";
-                lastCloudData = result.lastData || "";
-                syncLocalWithData(currentCloudData);
-                document.getElementById('user-info').innerText = `👤 使用者: ${currentUser}`;
-            } catch(e) { alert("登入失敗，請檢查網路"); return; }
-        } else {
-            isGuest = true;
-            document.getElementById('user-info').innerText = `🍃 訪客模式 (不支援儲存功能)`;
-        }
-
-        document.getElementById('login-overlay').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        fetchData();
-    }
-
-    async function fetchData() {
-        const loading = document.getElementById('loading-overlay');
+    if (type === 'member') {
+        if (!input) return alert("請輸入帳號");
+        currentUser = input;
         loading.classList.remove('hidden');
+        
         try {
-            const response = await fetch(api_url);
-            globalCardData = await response.json();
-            setupFilters();
-            applyFilters();
-        } finally {
-            loading.classList.add('hidden');
-        }
-    }
-
-    function setupFilters() {
-    const selCat = document.getElementById('filter-category');
-    const selDet = document.getElementById('filter-detail');
-    const selMem = document.getElementById('filter-member');
-
-    selCat.innerHTML = '<option value="">所有大類</option>';
-    Object.keys(categoryMap).forEach(cat => {
-        selCat.add(new Option(cat, cat));
-    });
-
-    selMem.innerHTML = '<option value="">所有成員</option>';
-    memberList.forEach(mem => {
-        selMem.add(new Option(mem, mem));
-    });
-
-    selCat.onchange = () => {
-        const selectedCat = selCat.value;
-        selDet.innerHTML = '<option value="">所有細項</option>';
-        
-        if (selectedCat && categoryMap[selectedCat]) {
-            categoryMap[selectedCat].forEach(det => {
-                selDet.add(new Option(det, det));
-            });
-        }
-        applyFilters();
-    };
-
-    selDet.onchange = applyFilters;
-    selMem.onchange = applyFilters;
-    }
-
-    function applyFilters() {
-        const cat = document.getElementById('filter-category').value;
-        const det = document.getElementById('filter-detail').value;
-        const mem = document.getElementById('filter-member').value;
-
-        const filtered = globalCardData.filter(c => 
-            (!cat || c.category === cat) && 
-            (!det || c.detail === det) && 
-            (!mem || c.member === mem)
-        );
-        renderCards(filtered);
-    }
-
-    function renderCards(cards) {
-        const gallery = document.getElementById('gallery');
-        gallery.innerHTML = '';
-        cards.forEach(card => {
-            const cardEl = document.createElement('div');
-            cardEl.className = `card ${localStorage.getItem(`pc-${card.id}`) === 'true' ? 'owned' : ''}`;
-            cardEl.innerHTML = `
-                <img src="${card.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x210?text=Error'">
-                <div class="card-info">
-                    <strong>${card.name}</strong><br>${card.member}
-                </div>
-            `;
-            cardEl.onclick = () => {
-                const isOwned = cardEl.classList.toggle('owned');
-                localStorage.setItem(`pc-${card.id}`, isOwned);
-                updateStats();
-            };
-            gallery.appendChild(cardEl);
-        });
-        updateStats();
-    }
-
-    function updateStats() {
-        const total = globalCardData.length;
-        const owned = globalCardData.filter(c => localStorage.getItem(`pc-${c.id}`) === 'true').length;
-        const pct = total === 0 ? 0 : Math.round((owned / total) * 100);
-        document.getElementById('stats').innerText = `已收集 ${owned} / ${total} (${pct}%)`;
-        document.getElementById('progress-fill').style.width = `${pct}%`;
-    }
-
-    async function saveData() {
-        if (isGuest) return alert("訪客無法儲存");
-        const ownedIds = globalCardData.filter(c => localStorage.getItem(`pc-${c.id}`) === 'true').map(c => c.id).join(',');
-        
-        document.getElementById('loading-overlay').classList.remove('hidden');
-        const res = await fetch(api_url, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'save', username: currentUser, data: ownedIds })
-        });
-        const result = await res.json();
-        if (result.status === 'saved') {
-            lastCloudData = currentCloudData;
-            currentCloudData = ownedIds;
-            alert("儲存成功！");
-        }
-        document.getElementById('loading-overlay').classList.add('hidden');
-    }
-
-    async function undoData() {
-    if (isGuest) return alert("訪客模式不支援此功能");
-    if (!lastCloudData) return alert("目前沒有上次儲存的紀錄可以還原");
-    
-    if (confirm("確定要還原至上次紀錄嗎？\n(還原後系統將自動為您同步至資料庫)")) {
-        
-        const loading = document.getElementById('loading-overlay');
-        loading.classList.remove('hidden');
-
-        try {
-            syncLocalWithData(lastCloudData);
-            
             const res = await fetch(api_url, {
                 method: 'POST',
-                body: JSON.stringify({ 
-                    action: 'save', 
-                    username: currentUser, 
-                    data: lastCloudData 
-                })
+                body: JSON.stringify({ action: 'login', username: currentUser })
             });
-            
             const result = await res.json();
-            
-            if (result.status === 'saved') {
-                currentCloudData = lastCloudData; 
-                alert("還原成功！");
-            } else {
-                alert("還原時同步失敗，請手動點擊儲存。");
-            }
-        } catch (error) {
-            console.error("還原同步出錯:", error);
-            alert("同步發生錯誤，請重新整理頁面。");
-        } finally {
-            loading.classList.add('hidden');
-        }
+            currentCloudData = result.currentData || "";
+            lastCloudData = result.lastData || "";
+            syncLocalWithData(currentCloudData);
+            document.getElementById('user-info').innerText = `👤 使用者: ${currentUser}`;
+        } catch(e) { alert("登入失敗，請檢查網路"); return; }
+    } else {
+        isGuest = true;
+        document.getElementById('user-info').innerText = `🍃 訪客模式 (不支援儲存功能)`;
+    }
+
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    fetchData();
+}
+
+async function fetchData() {
+    const loading = document.getElementById('loading-overlay');
+    loading.classList.remove('hidden');
+    try {
+        const response = await fetch(api_url);
+        globalCardData = await response.json();
+        setupFilters();
+        applyFilters();
+    } finally {
+        loading.classList.add('hidden');
     }
 }
 
-    function syncLocalWithData(dataStr) {
-        globalCardData.forEach(c => localStorage.removeItem(`pc-${c.id}`));
-        if (dataStr) {
-            dataStr.split(',').forEach(id => localStorage.setItem(`pc-${id}`, 'true'));
-        }
-        if (globalCardData.length > 0) applyFilters();
+function setupFilters() {
+const selCat = document.getElementById('filter-category');
+const selDet = document.getElementById('filter-detail');
+const selMem = document.getElementById('filter-member');
+
+selCat.innerHTML = '<option value="">所有大類</option>';
+Object.keys(categoryMap).forEach(cat => {
+    selCat.add(new Option(cat, cat));
+});
+
+selMem.innerHTML = '<option value="">所有成員</option>';
+memberList.forEach(mem => {
+    selMem.add(new Option(mem, mem));
+});
+
+selCat.onchange = () => {
+    const selectedCat = selCat.value;
+    selDet.innerHTML = '<option value="">所有細項</option>';
+    
+    if (selectedCat && categoryMap[selectedCat]) {
+        categoryMap[selectedCat].forEach(det => {
+            selDet.add(new Option(det, det));
+        });
     }
+    applyFilters();
+};
+
+selDet.onchange = applyFilters;
+selMem.onchange = applyFilters;
+}
+
+function applyFilters() {
+const cat = document.getElementById('filter-category').value;
+const det = document.getElementById('filter-detail').value;
+const mem = document.getElementById('filter-member').value;
+
+window.requestAnimationFrame(() => {
+    const filtered = globalCardData.filter(c => 
+        (!cat || c.category === cat) && 
+        (!det || c.detail === det) && 
+        (!mem || c.member === mem)
+    );
+    renderCards(filtered);
+});
+}
+
+function sortCards(cards) {
+return cards.sort((a, b) => {
+    const memberA = a.member || "";
+    const memberB = b.member || "";
+    if (memberA !== memberB) {
+        return memberA.localeCompare(memberB, 'zh-Hant');
+    }
+    return (a.name || "").localeCompare((b.name || ""), 'zh-Hant');
+});
+}
+
+function renderCards(cardsToDisplay) {
+const gallery = document.getElementById('gallery');
+gallery.innerHTML = '';
+
+const sortedCards = sortCards(cardsToDisplay);
+
+sortedCards.forEach(card => {
+    const cardEl = document.createElement('div');
+    const count = parseInt(localStorage.getItem(`pc-count-${card.id}`)) || 0;
+    
+    cardEl.className = `card ${count > 0 ? 'owned' : ''}`;
+    cardEl.id = `card-node-${card.id}`;
+    cardEl.style.position = "relative"; // 確保標籤定位正確
+    
+    cardEl.innerHTML = `
+        <div class="card-badge">${card.detail || '一般'}</div>
+        
+        <img src="${card.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x210?text=Error'">
+        
+        <div class="card-info">
+            <div style="height: 40px; overflow: hidden; margin-bottom: 5px;">
+                <strong>${card.name || ' '}</strong><br>
+                <span style="color: #666; font-size: 11px;">${card.member || ''}</span>
+            </div>
+            
+            <div class="count-controls" style="display: flex; align-items: center; justify-content: center; background: #f5f5f5; border-radius: 15px; padding: 2px;">
+                <button onclick="changeCount(${card.id}, -1, event)" class="cnt-btn">-</button>
+                <span id="count-display-${card.id}" class="count-num">${count}</span>
+                <button onclick="changeCount(${card.id}, 1, event)" class="cnt-btn">+</button>
+            </div>
+        </div>
+    `;
+
+    cardEl.onclick = (e) => {
+        if (e.target.tagName !== 'BUTTON') changeCount(card.id, 1, e);
+    };
+    
+    gallery.appendChild(cardEl);
+});
+updateStats();
+}
+
+function changeCount(id, delta, event) {
+if (event) event.stopPropagation(); // 防止觸發 cardEl.onclick
+
+let currentCount = parseInt(localStorage.getItem(`pc-count-${id}`)) || 0;
+let newCount = Math.max(0, currentCount + delta); 
+
+localStorage.setItem(`pc-count-${id}`, newCount);
+
+const countDisplay = document.getElementById(`count-display-${id}`);
+const cardEl = document.getElementById(`card-node-${id}`);
+
+if (countDisplay) countDisplay.innerText = newCount;
+if (cardEl) {
+    if (newCount > 0) cardEl.classList.add('owned');
+    else cardEl.classList.remove('owned');
+}
+
+updateStats();
+}
+
+function updateStats() {
+const totalTypes = globalCardData.length; 
+let ownedTypes = 0;   
+let totalCards = 0;   
+
+globalCardData.forEach(card => {
+    const count = parseInt(localStorage.getItem(`pc-count-${card.id}`)) || 0;
+    if (count > 0) {
+        ownedTypes++; 
+        totalCards += count; 
+    }
+});
+
+const pct = totalTypes === 0 ? 0 : Math.round((ownedTypes / totalTypes) * 100);
+
+const statsTypesEl = document.getElementById('stats-types');
+if (statsTypesEl) {
+    statsTypesEl.innerText = `種類進度: ${ownedTypes} / ${totalTypes} (${pct}%)`;
+}
+
+const statsTotalEl = document.getElementById('stats-total');
+if (statsTotalEl) {
+    statsTotalEl.innerText = `總持有張數: ${totalCards} 張`;
+}
+
+const progressFill = document.getElementById('progress-fill');
+if (progressFill) {
+    progressFill.style.width = `${pct}%`;
+}
+}
+
+async function saveData() {
+if (isGuest) return alert("訪客無法儲存至雲端");
+
+const dataParts = [];
+globalCardData.forEach(card => {
+    const count = localStorage.getItem(`pc-count-${card.id}`);
+    if (count && parseInt(count) > 0) {
+        dataParts.push(`${card.id}:${count}`);
+    }
+});
+const dataStr = dataParts.join(',');
+
+// 檢查字串長度是否超過我們設定的 5 欄總上限 (約 225,000 字元)
+if (dataStr.length > 225000) {
+    alert("資料量過大，已超過雲端儲存空間上限！");
+    return;
+}
+
+const loading = document.getElementById('loading-overlay');
+loading.classList.remove('hidden');
+
+try {
+    const res = await fetch(api_url, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'save', username: currentUser, data: dataStr })
+    });
+    const result = await res.json();
+    if (result.status === 'saved') {
+        lastCloudData = currentCloudData;
+        currentCloudData = dataStr;
+        alert(`雲端儲存成功！(空間使用: ${Math.round(dataStr.length / 225000 * 100)}%)`);
+    }
+} catch (e) {
+    alert("儲存失敗，請檢查網路連線");
+} finally {
+    loading.classList.add('hidden');
+}
+}
+
+async function undoData() {
+if (isGuest) return alert("訪客模式不支援此功能");
+if (!lastCloudData) return alert("目前沒有上次儲存的紀錄可以還原");
+
+if (confirm("確定要還原至上次紀錄嗎？\n(還原後系統將自動為您同步至資料庫)")) {
+    
+    const loading = document.getElementById('loading-overlay');
+    loading.classList.remove('hidden');
+
+    try {
+        syncLocalWithData(lastCloudData);
+        
+        const res = await fetch(api_url, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'save', 
+                username: currentUser, 
+                data: lastCloudData 
+            })
+        });
+        
+        const result = await res.json();
+        
+        if (result.status === 'saved') {
+            currentCloudData = lastCloudData; 
+            alert("還原成功！");
+        } else {
+            alert("還原時同步失敗，請手動點擊儲存。");
+        }
+    } catch (error) {
+        console.error("還原同步出錯:", error);
+        alert("同步發生錯誤，請重新整理頁面。");
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+}
+
+function syncLocalWithData(dataStr) {
+
+globalCardData.forEach(c => localStorage.removeItem(`pc-count-${c.id}`));
+
+if (dataStr) {
+    dataStr.split(',').forEach(item => {
+        if (item.includes(':')) {
+            const [id, count] = item.split(':');
+            if (id && count) localStorage.setItem(`pc-count-${id}`, count);
+        } else if (item) {
+            localStorage.setItem(`pc-count-${item}`, "1");
+        }
+    });
+}
+
+if (globalCardData.length > 0) applyFilters();
+}
 </script>
 </body>
 </html>
+
 
 
