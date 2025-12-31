@@ -55,8 +55,9 @@
         .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-green), var(--primary-green)); transition: width 0.3s ease; }
 
         /* 按鈕與下拉選單 */
-        .controls-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
-        select, .btn {
+        .controls-group {display: flex;flex-wrap: wrap;justify-content: center;gap: 8px;padding: 10px;}
+        select {min-width: 140px;max-width: 200px;text-overflow: ellipsis; }
+        .btn {
             padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-green);
             outline: none; cursor: pointer; font-size: 14px;
         }
@@ -106,8 +107,8 @@
             <select id="filter-category"><option value="">所有大類</option></select>
             <select id="filter-detail"><option value="">所有細項</option></select>
             <select id="filter-member"><option value="">所有成員</option></select>
-            <button onclick="saveData()" class="btn btn-save">💾 儲存</button>
-            <button onclick="undoData()" class="btn btn-undo">↩️ 返回</button>
+            <button onclick="saveData()" class="btn btn-save">儲存</button>
+            <button onclick="undoData()" class="btn btn-undo">返回上次儲存資料</button>
         </div>
     </div>
     <div class="container" id="gallery"></div>
@@ -121,6 +122,17 @@
     let isGuest = false;
     let currentCloudData = "";
     let lastCloudData = "";
+    const categoryMap = {
+    "專輯": ["Mini1", "Mini2", "Mini3", "正規1", "Mini4", "Mini5", "Mini6", "Mini7", "Single Album", "正規2", "JAPAN DEBUT SINGLE", "JAPAN 1st EP"],
+    "演唱會/FANCON": ["2020 FANMEETING : C EXPRESS", "2021 FANMEETING : C DELIVERY", "2022 1st CONCERT : CENTER OF GRAVITY", "2022 1st FAN-CON IN OSAKA", "2022 UNI-KON", "2022 CHRISTMAS SPECIAL FANMEETING", "2023 FAN-CON : Dear My Luvity", "2023 1ST WORLD TOUR : MASTER PIECE", "2024 FAN-CON : LUVITY GAMES", "2024 JAPAN FANCON : SHOW OFF", "2024 FAN-CON : BEYOND YOUR MEMORIES", "2025 FAN CONCERT : Dare to Crave", "2026 FAN-CON : VITY FESTA"],
+    "快閃店": ["CCREW", "3rd ANNIVERSARY : REMEMBER OUR TIME", "SUMMER CCREW", "WINTER CCREW", "AUTUMN CCREW"],
+    "年曆": ["2021 : CAFE∙CRAVITY", "2022 : BAND CRVT", "2023 : CRVT’S SWEETS", "2024 : CRVT-STAY", "2025 : CRAVITY BFF TRIP", "2026 : WE ARE CRAVITY CREW"],
+    "會員禮": ["2020 1st FANSHIP", "2021 2nd FANSHIP", "2022 2.5 FANSHIP", "2023 3rd FANSHIP", "2024 4th FANSHIP", "2025 5th FANSHIP"],
+    "其他": ["2020夏盒 : COME TOGETHER", "BLACKROUGE 代言", "LEAGUE OF THE UNIVERSE", "UNIVERSE FANPARTY : SUNDAY CRAVITY", "2021夏盒 : STAND TOGETHER", "SEARCHIT 代言", "MAKE P:REM 代言", "2023 FAN-CON DVD", "2023 1ST WORLD TOUR DVD"]
+};
+
+// 2. 定義成員清單 (也可以順便固定順序)
+const memberList = ["世琳", "艾倫", "廷謨", "宇璸", "元進", "敏熙", "刑準", "太榮", "性珉"];
 
     // 登入邏輯
     async function handleLogin(type) {
@@ -167,24 +179,34 @@
     }
 
     function setupFilters() {
-        const cats = [...new Set(globalCardData.map(c => c.category))].filter(Boolean);
-        const mems = [...new Set(globalCardData.map(c => c.member))].filter(Boolean);
+    const selCat = document.getElementById('filter-category');
+    const selDet = document.getElementById('filter-detail');
+    const selMem = document.getElementById('filter-member');
+
+    selCat.innerHTML = '<option value="">所有大類</option>';
+    Object.keys(categoryMap).forEach(cat => {
+        selCat.add(new Option(cat, cat));
+    });
+
+    selMem.innerHTML = '<option value="">所有成員</option>';
+    memberList.forEach(mem => {
+        selMem.add(new Option(mem, mem));
+    });
+
+    selCat.onchange = () => {
+        const selectedCat = selCat.value;
+        selDet.innerHTML = '<option value="">所有細項</option>';
         
-        const selCat = document.getElementById('filter-category');
-        const selDet = document.getElementById('filter-detail');
-        const selMem = document.getElementById('filter-member');
+        if (selectedCat && categoryMap[selectedCat]) {
+            categoryMap[selectedCat].forEach(det => {
+                selDet.add(new Option(det, det));
+            });
+        }
+        applyFilters();
+    };
 
-        cats.forEach(c => selCat.add(new Option(c, c)));
-        mems.forEach(m => selMem.add(new Option(m, m)));
-
-        selCat.onchange = () => {
-            const relevantDetails = [...new Set(globalCardData.filter(c => c.category === selCat.value).map(c => c.detail))].filter(Boolean);
-            selDet.innerHTML = '<option value="">所有細項</option>';
-            relevantDetails.forEach(d => selDet.add(new Option(d, d)));
-            applyFilters();
-        };
-        selDet.onchange = applyFilters;
-        selMem.onchange = applyFilters;
+    selDet.onchange = applyFilters;
+    selMem.onchange = applyFilters;
     }
 
     function applyFilters() {
@@ -265,3 +287,4 @@
 </script>
 </body>
 </html>
+
